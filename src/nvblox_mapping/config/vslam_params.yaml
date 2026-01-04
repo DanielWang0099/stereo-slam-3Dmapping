@@ -1,0 +1,60 @@
+visual_slam_node:
+  ros__parameters:
+    use_sim_time: true
+    
+    # Camera configuration
+    num_cameras: 2
+    min_num_images: 2
+    
+    # Image settings
+    rectified_images: true
+    enable_image_denoising: false
+    
+    # IMU fusion (enable if IMU is available)
+    enable_imu_fusion: true
+    gyro_noise_density: 0.000244
+    gyro_random_walk: 0.000019393
+    accel_noise_density: 0.001862
+    accel_random_walk: 0.003
+    calibration_frequency: 200.0
+    
+    # SLAM mode - use odometry only since Unity provides ground truth localization
+    enable_localization_n_mapping: false
+    enable_ground_constraint_in_odometry: false
+    enable_ground_constraint_in_slam: false
+    
+    # Synchronization thresholds
+    sync_matching_threshold_ms: 5.0
+    image_jitter_threshold_ms: 60.0
+    imu_jitter_threshold_ms: 10.0
+    
+    # Frame names - match AUV TF tree
+    # IMPORTANT: camera_optical_frames must match the frame_id in camera_info messages
+    # These frames should use optical convention (Z-forward, X-right, Y-down)
+    # If Unity cameras use link convention, add static TF: link -> optical with rotation
+    map_frame: "map"
+    odom_frame: "odom"
+    base_frame: "auv/base_link"
+    imu_frame: "auv/imu_link"
+    camera_optical_frames: ["auv/stereo_left_optical_frame", "auv/stereo_right_optical_frame"]
+    
+    # TF publishing - VSLAM publishes odom, Unity provides map->odom correction
+    # This allows VSLAM odometry to work alongside Unity ground truth
+    publish_map_to_odom_tf: false
+    publish_odom_to_base_tf: true
+    invert_map_to_odom_tf: false
+    invert_odom_to_base_tf: false
+    
+    # Buffer sizes
+    image_buffer_size: 100
+    imu_buffer_size: 50
+    
+    # Visualization (enable for debugging)
+    enable_slam_visualization: false
+    enable_observations_view: false
+    enable_landmarks_view: false
+    path_max_size: 1024
+    
+    # Debug
+    verbosity: 0
+    enable_debug_mode: false

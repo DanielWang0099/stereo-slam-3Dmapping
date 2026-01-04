@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>unity_nitros_bridge</name>
+  <version>1.0.0</version>
+  <description>
+    GPU-accelerated NITROS bridge for Unity simulation.
+    Provides zero-copy JPEG decoding using NVJPEG with NITROS type publishing.
+  </description>
+  <maintainer email="danielwang0099@example.com">Daniel Wang</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Core dependencies -->
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+
+  <!-- NITROS dependencies -->
+  <depend>isaac_ros_nitros</depend>
+  <depend>isaac_ros_managed_nitros</depend>
+  <depend>isaac_ros_nitros_image_type</depend>
+  <depend>isaac_ros_nitros_camera_info_type</depend>
+
+  <!-- NITROS Bridge interfaces (for TRUE zero-copy with CUDA IPC) -->
+  <depend>isaac_ros_nitros_bridge_interfaces</depend>
+
+  <!-- Image processing -->
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

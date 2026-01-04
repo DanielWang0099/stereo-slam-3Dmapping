@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>nvblox_mapping</name>
+  <version>0.0.1</version>
+  <description>Launch scaffolding for a GPU-only ESS + VSLAM + Nvblox mapping pipeline using NITROS zero-copy.</description>
+  <maintainer email="danielwang0099@example.com">Daniel Wang</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>rclcpp_components</exec_depend>
+
+  <!-- Pipeline components -->
+  <exec_depend>isaac_ros_ess</exec_depend>
+  <exec_depend>isaac_ros_visual_slam</exec_depend>
+  <exec_depend>isaac_ros_nvblox</exec_depend>
+  <exec_depend>nvblox_ros</exec_depend>
+  <exec_depend>unity_nitros_bridge</exec_depend>
+  <exec_depend>isaac_ros_image_proc</exec_depend>
+
+  <!-- NITROS types -->
+  <exec_depend>isaac_ros_managed_nitros</exec_depend>
+  <exec_depend>isaac_ros_nitros</exec_depend>
+  <exec_depend>isaac_ros_nitros_camera_info_type</exec_depend>
+  <exec_depend>isaac_ros_nitros_disparity_image_type</exec_depend>
+  <exec_depend>isaac_ros_nitros_image_type</exec_depend>
+
+  <!-- Message dependencies referenced in launch config -->
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>stereo_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,12 @@
+ess_disparity_node:
+  ros__parameters:
+    use_sim_time: true
+    # Pre-trained ESS model (TensorRT engine, GPU)
+    engine_file_path: /workspaces/isaac_ros-dev/isaac_ros_assets/models/dnn_stereo_disparity/dnn_stereo_disparity_v4.1.0_onnx/ess.engine
+
+    # Network input resolution (must match engine)
+    input_layer_width: 960
+    input_layer_height: 576
+
+    # Confidence threshold for disparity masking (0-1). Adjust later if needed.
+    threshold: 0.4

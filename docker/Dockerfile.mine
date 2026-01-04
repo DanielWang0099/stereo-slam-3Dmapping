@@ -1,0 +1,15 @@
+ARG BASE_IMAGE=nvcr.io/nvidia/isaac/ros:x86_64-ros2_humble_f8edad8d48e9aa1b5b240c2374c55d60
+FROM ${BASE_IMAGE}
+
+RUN apt-get update && apt-get install -y \
+    ros-humble-isaac-ros-ess \
+    ros-humble-isaac-ros-ess-models-install \
+    ros-humble-isaac-ros-visual-slam \
+    ros-humble-isaac-ros-nvblox \
+    ros-humble-mavros \
+    ros-humble-isaac-ros-image-proc \
+    ros-humble-isaac-ros-stereo-image-proc \
+    ros-humble-isaac-ros-nitros-bridge-ros2 \
+    ros-humble-isaac-ros-pynitros \
+    ros-humble-mavros-msgs \
+    ros-humble-vision-msgs

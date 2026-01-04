@@ -1,0 +1,42 @@
+nvblox_node:
+  ros__parameters:
+    use_sim_time: true
+    
+    # CUDA configuration - use default stream to avoid device ordinal issues
+    cuda_stream_type: 0
+    
+    # Frame configuration - ALL frame parameters must match TF tree
+    global_frame: "odom"
+    map_clearing_frame_id: "auv/base_link"
+    pose_frame: "auv/base_link"
+    
+    # ESDF slice visualization frames
+    esdf_slice_bounds_visualization_attachment_frame_id: "auv/base_link"
+    workspace_height_bounds_visualization_attachment_frame_id: "auv/base_link"
+    
+    # Voxel size (meters)
+    voxel_size: 0.05
+    
+    # Integration settings
+    max_integration_distance_m: 7.0
+    integrate_depth_rate_hz: 30.0
+    integrate_color_rate_hz: 10.0
+    
+    # Update rates
+    update_mesh_rate_hz: 5.0
+    update_esdf_rate_hz: 5.0
+    
+    # Input configuration
+    use_depth: true
+    use_color: true
+    use_lidar: false
+    
+    # Mesh output
+    compute_mesh: true
+    compute_esdf: true
+    esdf_mode: "2d"
+    
+    # ESDF slice height settings (for 2D navigation)
+    static_mapper.esdf_slice_min_height: -0.5
+    static_mapper.esdf_slice_max_height: 1.5
+    static_mapper.esdf_slice_height: 0.5

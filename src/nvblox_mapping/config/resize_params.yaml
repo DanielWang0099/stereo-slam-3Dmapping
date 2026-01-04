@@ -1,0 +1,13 @@
+left_resize:
+  ros__parameters:
+    use_sim_time: true
+    output_width: 960
+    output_height: 576
+    keep_aspect_ratio: false
+
+right_resize:
+  ros__parameters:
+    use_sim_time: true
+    output_width: 960
+    output_height: 576
+    keep_aspect_ratio: false

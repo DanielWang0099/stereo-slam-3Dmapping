@@ -1,0 +1,26 @@
+# Unity NITROS Bridge - JPEG Decoder Parameters
+#
+# Configuration for the NitrosJpegDecoderNode
+# This node decodes compressed JPEG images on GPU using NVJPEG
+# and publishes as NITROS images for zero-copy pipeline processing.
+
+/**:
+  ros__parameters:
+    # Input topic for compressed JPEG images
+    input_compressed_topic: "image/compressed"
+    
+    # Input topic for camera calibration info
+    input_camera_info_topic: "camera_info"
+    
+    # Output topic for decoded raw images (NITROS)
+    output_image_topic: "image_raw"
+    
+    # Output topic for camera info (pass-through)
+    output_camera_info_topic: "camera_info"
+    
+    # Output image encoding (rgb8, bgr8)
+    output_encoding: "rgb8"
+    
+    # Output dimensions (0 = use source size)
+    output_width: 0
+    output_height: 0
