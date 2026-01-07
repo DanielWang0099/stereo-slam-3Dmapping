@@ -17,3 +17,5 @@ dist
 isaac_ros_assets/
 bags/
 *.gv
+/bags/*
+frames*

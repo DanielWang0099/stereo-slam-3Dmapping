@@ -65,10 +65,14 @@ def generate_launch_description():
     # =========================================================================
     ess_container = ComposableNodeContainer(
         name="ess_container",
-        namespace="",
+        namespace="kevin",
         package="rclcpp_components",
         executable="component_container_mt",
         output="screen",
+        remappings=[
+            ("/tf", "tf"),
+            ("/tf_static", "tf_static"),
+        ],
         composable_node_descriptions=[
             # -----------------------------------------------------------------
             # Stage 1: JPEG Decode → NitrosBridgeImage (CUDA IPC)
@@ -80,10 +84,10 @@ def generate_launch_description():
                 name="left_bridge_decoder",
                 parameters=[
                     {"use_sim_time": use_sim_time},
-                    {"input_compressed_topic": "/stereo_camera/left/rgb/compressed"},
-                    {"input_camera_info_topic": "/stereo_camera/left/camera_info"},
-                    {"output_bridge_image_topic": "/stereo_camera/left/nitros_bridge"},
-                    {"output_camera_info_topic": "/stereo_camera/left/camera_info_decoded"},
+                    {"input_compressed_topic": "/kevin/stereo_camera/left/rgb/compressed"},
+                    {"input_camera_info_topic": "/kevin/stereo_camera/left/camera_info"},
+                    {"output_bridge_image_topic": "stereo_camera/left/nitros_bridge"},
+                    {"output_camera_info_topic": "stereo_camera/left/camera_info_decoded"},
                     {"num_buffers": 8},
                     {"device_id": 0},
                 ],
@@ -95,10 +99,10 @@ def generate_launch_description():
                 name="right_bridge_decoder",
                 parameters=[
                     {"use_sim_time": use_sim_time},
-                    {"input_compressed_topic": "/stereo_camera/right/rgb/compressed"},
-                    {"input_camera_info_topic": "/stereo_camera/right/camera_info"},
-                    {"output_bridge_image_topic": "/stereo_camera/right/nitros_bridge"},
-                    {"output_camera_info_topic": "/stereo_camera/right/camera_info_decoded"},
+                    {"input_compressed_topic": "/kevin/stereo_camera/right/rgb/compressed"},
+                    {"input_camera_info_topic": "/kevin/stereo_camera/right/camera_info"},
+                    {"output_bridge_image_topic": "stereo_camera/right/nitros_bridge"},
+                    {"output_camera_info_topic": "stereo_camera/right/camera_info_decoded"},
                     {"num_buffers": 8},
                     {"device_id": 0},
                 ],
@@ -114,8 +118,8 @@ def generate_launch_description():
                 name="left_image_converter",
                 parameters=[
                     {"use_sim_time": use_sim_time},
-                    {"input_bridge_topic": "/stereo_camera/left/nitros_bridge"},
-                    {"output_image_topic": "/stereo_camera/left/image_raw"},
+                    {"input_bridge_topic": "stereo_camera/left/nitros_bridge"},
+                    {"output_image_topic": "stereo_camera/left/image_raw"},
                     {"device_id": 0},
                 ],
             ),
@@ -126,8 +130,8 @@ def generate_launch_description():
                 name="right_image_converter",
                 parameters=[
                     {"use_sim_time": use_sim_time},
-                    {"input_bridge_topic": "/stereo_camera/right/nitros_bridge"},
-                    {"output_image_topic": "/stereo_camera/right/image_raw"},
+                    {"input_bridge_topic": "stereo_camera/right/nitros_bridge"},
+                    {"output_image_topic": "stereo_camera/right/image_raw"},
                     {"device_id": 0},
                 ],
             ),
@@ -142,10 +146,12 @@ def generate_launch_description():
                 name="left_resize",
                 parameters=[{"use_sim_time": use_sim_time}, resize_params_path],
                 remappings=[
-                    ("camera_info", "/stereo_camera/left/camera_info"),
-                    ("image", "/stereo_camera/left/image_raw"),
-                    ("resize/camera_info", "/stereo_camera/left/camera_info_resize"),
-                    ("resize/image", "/stereo_camera/left/image_resize"),
+                    ("camera_info", "stereo_camera/left/camera_info_decoded"),
+                    ("image", "stereo_camera/left/image_raw"),
+                    ("resize/camera_info", "stereo_camera/left/camera_info_resize"),
+                    ("resize/image", "stereo_camera/left/image_resize"),
+                    ("/tf", "tf"),
+                    ("/tf_static", "tf_static"),
                 ],
             ),
             # Right image resize
@@ -155,10 +161,12 @@ def generate_launch_description():
                 name="right_resize",
                 parameters=[{"use_sim_time": use_sim_time}, resize_params_path],
                 remappings=[
-                    ("camera_info", "/stereo_camera/right/camera_info"),
-                    ("image", "/stereo_camera/right/image_raw"),
-                    ("resize/camera_info", "/stereo_camera/right/camera_info_resize"),
-                    ("resize/image", "/stereo_camera/right/image_resize"),
+                    ("camera_info", "stereo_camera/right/camera_info_decoded"),
+                    ("image", "stereo_camera/right/image_raw"),
+                    ("resize/camera_info", "stereo_camera/right/camera_info_resize"),
+                    ("resize/image", "stereo_camera/right/image_resize"),
+                    ("/tf", "tf"),
+                    ("/tf_static", "tf_static"),
                 ],
             ),
             
@@ -171,10 +179,12 @@ def generate_launch_description():
                 name="ess_disparity_node",
                 parameters=[{"use_sim_time": use_sim_time}, ess_params_path],
                 remappings=[
-                    ("left/image_rect", "/stereo_camera/left/image_resize"),
-                    ("left/camera_info", "/stereo_camera/left/camera_info_resize"),
-                    ("right/image_rect", "/stereo_camera/right/image_resize"),
-                    ("right/camera_info", "/stereo_camera/right/camera_info_resize"),
+                    ("left/image_rect", "stereo_camera/left/image_resize"),
+                    ("left/camera_info", "stereo_camera/left/camera_info_resize"),
+                    ("right/image_rect", "stereo_camera/right/image_resize"),
+                    ("right/camera_info", "stereo_camera/right/camera_info_resize"),
+                    ("/tf", "tf"),
+                    ("/tf_static", "tf_static"),
                 ],
             ),
             
@@ -188,8 +198,10 @@ def generate_launch_description():
                 name="disparity_to_depth_node",
                 parameters=[{"use_sim_time": use_sim_time}],
                 remappings=[
-                    ("disparity", "/disparity"),
-                    ("depth", "/depth"),
+                    ("disparity", "disparity"),
+                    ("depth", "depth"),
+                    ("/tf", "tf"),
+                    ("/tf_static", "tf_static"),
                 ],
             ),
             
@@ -202,11 +214,13 @@ def generate_launch_description():
                 name="visual_slam_node",
                 parameters=[{"use_sim_time": use_sim_time}, vslam_params_path],
                 remappings=[
-                    ("visual_slam/image_0", "/stereo_camera/left/image_resize"),
-                    ("visual_slam/camera_info_0", "/stereo_camera/left/camera_info_resize"),
-                    ("visual_slam/image_1", "/stereo_camera/right/image_resize"),
-                    ("visual_slam/camera_info_1", "/stereo_camera/right/camera_info_resize"),
-                    ("visual_slam/imu", "/mavros/imu/data"),
+                    ("visual_slam/image_0", "stereo_camera/left/image_resize"),
+                    ("visual_slam/camera_info_0", "stereo_camera/left/camera_info_resize"),
+                    ("visual_slam/image_1", "stereo_camera/right/image_resize"),
+                    ("visual_slam/camera_info_1", "stereo_camera/right/camera_info_resize"),
+                    ("visual_slam/imu", "/kevin/mavros/imu/data"),
+                    ("/tf", "tf"),
+                    ("/tf_static", "tf_static"),
                 ],
             ),
         ],
@@ -218,10 +232,14 @@ def generate_launch_description():
     # =========================================================================
     nvblox_container = ComposableNodeContainer(
         name="nvblox_container",
-        namespace="",
+        namespace="kevin",
         package="rclcpp_components",
         executable="component_container_mt",
         output="screen",
+        remappings=[
+            ("/tf", "tf"),
+            ("/tf_static", "tf_static"),
+        ],
         composable_node_descriptions=[
             ComposableNode(
                 package="nvblox_ros",
@@ -231,10 +249,12 @@ def generate_launch_description():
                 remappings=[
                     # nvblox subscribes to camera_0/depth/image and camera_0/depth/camera_info
                     # NOT depth/image - this is the actual internal topic naming!
-                    ("camera_0/depth/image", "/depth"),
-                    ("camera_0/depth/camera_info", "/stereo_camera/left/camera_info_resize"),
-                    ("camera_0/color/image", "/stereo_camera/left/image_resize"),
-                    ("camera_0/color/camera_info", "/stereo_camera/left/camera_info_resize"),
+                    ("camera_0/depth/image", "depth"),
+                    ("camera_0/depth/camera_info", "stereo_camera/left/camera_info_resize"),
+                    ("camera_0/color/image", "stereo_camera/left/image_resize"),
+                    ("camera_0/color/camera_info", "stereo_camera/left/camera_info_resize"),
+                    ("/tf", "tf"),
+                    ("/tf_static", "tf_static"),
                 ],
             ),
         ],
@@ -260,28 +280,32 @@ def generate_launch_description():
         package="tf2_ros",
         executable="static_transform_publisher",
         name="left_optical_tf",
+        namespace="kevin",
         arguments=[
             "--x", "0", "--y", "0", "--z", "0",
             "--qx", str(optical_qx), "--qy", str(optical_qy), 
             "--qz", str(optical_qz), "--qw", str(optical_qw),
-            "--frame-id", "auv/stereo_left_link",
-            "--child-frame-id", "auv/stereo_left_optical_frame",
+            "--frame-id", "stereo_left_link",
+            "--child-frame-id", "stereo_left_optical_frame",
         ],
         parameters=[{"use_sim_time": use_sim_time}],
+        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
     )
     
     right_optical_tf = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
         name="right_optical_tf",
+        namespace="kevin",
         arguments=[
             "--x", "0", "--y", "0", "--z", "0",
             "--qx", str(optical_qx), "--qy", str(optical_qy), 
             "--qz", str(optical_qz), "--qw", str(optical_qw),
-            "--frame-id", "auv/stereo_right_link",
-            "--child-frame-id", "auv/stereo_right_optical_frame",
+            "--frame-id", "stereo_right_link",
+            "--child-frame-id", "stereo_right_optical_frame",
         ],
         parameters=[{"use_sim_time": use_sim_time}],
+        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
     )
     
     # Odom frame - identity transform from map to odom
@@ -291,6 +315,7 @@ def generate_launch_description():
         package="tf2_ros",
         executable="static_transform_publisher",
         name="odom_tf",
+        namespace="kevin",
         arguments=[
             "--x", "0", "--y", "0", "--z", "0",
             "--qx", "0", "--qy", "0", "--qz", "0", "--qw", "1",
@@ -298,6 +323,7 @@ def generate_launch_description():
             "--child-frame-id", "odom",
         ],
         parameters=[{"use_sim_time": use_sim_time}],
+        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")],
     )
 
     return LaunchDescription(
@@ -307,10 +333,11 @@ def generate_launch_description():
                 default_value="true",
                 description="Use simulation time from rosbag/clock",
             ),
-            # Static TF publishers (must start first)
+            # Static TF publishers - publish to /kevin/tf_static via namespace + remapping
+            # These create optical frames from link frames for VSLAM
             left_optical_tf,
             right_optical_tf,
-            odom_tf,
+            # Note: odom_tf NOT needed - bag already provides map->odom->base_link on /kevin/tf
             # Processing containers
             ess_container,
             nvblox_container,

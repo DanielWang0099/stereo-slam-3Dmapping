@@ -7,12 +7,12 @@ nvblox_node:
     
     # Frame configuration - ALL frame parameters must match TF tree
     global_frame: "odom"
-    map_clearing_frame_id: "auv/base_link"
-    pose_frame: "auv/base_link"
+    map_clearing_frame_id: "base_link"
+    pose_frame: "base_link"
     
     # ESDF slice visualization frames
-    esdf_slice_bounds_visualization_attachment_frame_id: "auv/base_link"
-    workspace_height_bounds_visualization_attachment_frame_id: "auv/base_link"
+    esdf_slice_bounds_visualization_attachment_frame_id: "base_link"
+    workspace_height_bounds_visualization_attachment_frame_id: "base_link"
     
     # Voxel size (meters)
     voxel_size: 0.05

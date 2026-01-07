@@ -31,18 +31,7 @@ if [[ -n "$FOXGLOVE_CONNECT_HOST" ]]; then
   echo "Connect Foxglove Studio to: ws://${FOXGLOVE_CONNECT_HOST}:${FOXGLOVE_PORT}"
 fi
 
-# Run foxglove bridge with reduced verbosity for internal nodes
-exec ros2 launch foxglove_bridge foxglove_bridge_launch.xml \
-  port:="${FOXGLOVE_PORT}" \
-  address:="${FOXGLOVE_ADDRESS}" \
-  include_hidden:=false \
-  send_buffer_limit:=100000000
-  echo "Connect from Windows: ws://${FOXGLOVE_CONNECT_HOST}:${FOXGLOVE_PORT}"
-else
-  echo "Connect from Windows: ws://<wsl-ip>:${FOXGLOVE_PORT}"
-fi
-echo "Override with FOXGLOVE_ADDRESS, FOXGLOVE_PORT, or FOXGLOVE_CONNECT_HOST."
-
+# Run foxglove bridge
 exec ros2 run foxglove_bridge foxglove_bridge --ros-args \
   -p address:="$FOXGLOVE_ADDRESS" \
   -p port:="$FOXGLOVE_PORT"
