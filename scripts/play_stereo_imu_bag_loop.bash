@@ -18,12 +18,7 @@ if [[ ! -f "$BAG_PATH/metadata.yaml" ]]; then
   exit 1
 fi
 
-# IMPORTANT: Exclude /tf from bag playback to prevent vehicle odometry pollution
-# The bag contains odom->base_link on /tf which should NOT be on the global /tf
-# Only ground truth (map->robot/base_link_gt) should be on global /tf
-# Vehicle-specific transforms are correctly on /kevin/tf
 exec ros2 bag play "$BAG_PATH" \
   --loop \
   --rate "$RATE" \
-  --start-offset "$START" \
-  --topics-regex "^(?!/tf$).*"
+  --start-offset "$START"

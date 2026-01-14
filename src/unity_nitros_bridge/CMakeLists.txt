@@ -181,6 +181,29 @@ rclcpp_components_register_nodes(nitros_image_decoder_node
 )
 
 # =============================================================================
+# CameraInfo Header Rewriter Node (frame_id correction for VSLAM)
+# =============================================================================
+add_library(camera_info_header_rewriter_node SHARED
+  src/camera_info_header_rewriter_node.cpp
+)
+
+target_include_directories(camera_info_header_rewriter_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
+ament_target_dependencies(camera_info_header_rewriter_node
+  rclcpp
+  rclcpp_components
+  sensor_msgs
+)
+
+# Register as composable node
+rclcpp_components_register_nodes(camera_info_header_rewriter_node
+  "unity_nitros_bridge::CameraInfoHeaderRewriterNode"
+)
+
+# =============================================================================
 # Installation
 # =============================================================================
 install(
@@ -189,7 +212,7 @@ install(
 )
 
 install(
-  TARGETS nitros_bridge_jpeg_decoder_node image_converter_node nitros_image_decoder_node
+  TARGETS nitros_bridge_jpeg_decoder_node image_converter_node nitros_image_decoder_node camera_info_header_rewriter_node
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -203,7 +226,7 @@ install(
 
 # Export
 ament_export_include_directories(include)
-ament_export_libraries(nitros_bridge_jpeg_decoder_node image_converter_node nitros_image_decoder_node)
+ament_export_libraries(nitros_bridge_jpeg_decoder_node image_converter_node nitros_image_decoder_node camera_info_header_rewriter_node)
 ament_export_targets(export_${PROJECT_NAME})
 ament_export_dependencies(
   rclcpp

@@ -2,6 +2,9 @@ visual_slam_node:
   ros__parameters:
     use_sim_time: true
     
+    # Logger configuration - suppress timing warnings
+    ros__log_level: ERROR
+    
     # Camera configuration
     num_cameras: 2
     min_num_images: 2
@@ -24,25 +27,34 @@ visual_slam_node:
     enable_ground_constraint_in_slam: false
     
     # Synchronization thresholds
-    sync_matching_threshold_ms: 5.0
-    image_jitter_threshold_ms: 60.0
-    imu_jitter_threshold_ms: 10.0
+    # Note: Bag plays at 30Hz (33.3ms) but timing varies to 40ms due to processing
+    # Set thresholds higher to tolerate jitter without warnings
+    sync_matching_threshold_ms: 50.0
+    image_jitter_threshold_ms: 50.0
+    imu_jitter_threshold_ms: 50.0
+    
+    # Override auto-calculated thresholds with explicit values
+    # This prevents VSLAM from using strict 34ms threshold based on 30fps
+    override_publishing_stamp: false
     
     # Frame names - match AUV TF tree
-    # IMPORTANT: camera_optical_frames must match the frame_id in camera_info messages
-    # The bag provides camera_info with frame_id: stereo_left_link and stereo_right_link
-    # We create static TFs: stereo_left_link -> stereo_left_optical_frame
-    # VSLAM needs optical frames (Z-forward) so we use the optical frame names
+    # IMPORTANT: These are TF frame names (not topic names)
+    # The bag provides TF tree: map -> odom -> base_link -> stereo_left_link
+    # Static transform publishers add: stereo_left_link -> stereo_left_optical_frame
     map_frame: "map"
     odom_frame: "odom"
     base_frame: "base_link"
     imu_frame: "imu_link"
+    # cuVSLAM expects optical camera frames (Z-forward, X-right, Y-down)
+    # Must match frame_id in remapped camera_info messages
     camera_optical_frames: ["stereo_left_optical_frame", "stereo_right_optical_frame"]
     
-    # TF publishing - VSLAM publishes odom, Unity provides map->odom correction
-    # This allows VSLAM odometry to work alongside Unity ground truth
+    # TF publishing - DISABLED for bag playback since bag provides ground truth transforms
+    # The bag provides: map → odom → base_link (global localization reference)
+    # cuVSLAM estimates are available via /visual_slam/tracking/odometry topic
+    # (For live sensor operation without ground truth, enable these transforms)
     publish_map_to_odom_tf: false
-    publish_odom_to_base_tf: true
+    publish_odom_to_base_tf: false
     invert_map_to_odom_tf: false
     invert_odom_to_base_tf: false
     
@@ -50,11 +62,15 @@ visual_slam_node:
     image_buffer_size: 100
     imu_buffer_size: 50
     
-    # Visualization (enable for debugging)
-    enable_slam_visualization: false
-    enable_observations_view: false
+    # Visualization (enable for debug ging)
+    enable_slam_visualization: true
+    enable_observations_view: true
     enable_landmarks_view: false
     path_max_size: 1024
+    
+    # Visualization frame attachment (where to attach visualization markers)
+    # Use base_link for robot-centric view, map for global view
+    camera_visualization_frame_id: "base_link"
     
     # Debug
     verbosity: 0

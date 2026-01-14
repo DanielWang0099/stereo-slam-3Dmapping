@@ -2,6 +2,9 @@ nvblox_node:
   ros__parameters:
     use_sim_time: true
     
+    # Note: Topics are remapped in launch file to /kevin/ namespace
+    # Frame names below are TF frame IDs (not topic namespaces)
+    
     # CUDA configuration - use default stream to avoid device ordinal issues
     cuda_stream_type: 0
     

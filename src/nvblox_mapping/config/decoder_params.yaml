@@ -1,13 +1,13 @@
 left_decoder:
   ros__parameters:
     use_sim_time: true
-    input_topic: /stereo_camera/left/rgb/compressed
-    output_topic: /stereo_camera/left/image_raw
+    input_topic: stereo_camera/left/rgb/compressed
+    output_topic: stereo_camera/left/image_raw
     encoding: rgb8
 
 right_decoder:
   ros__parameters:
     use_sim_time: true
-    input_topic: /stereo_camera/right/rgb/compressed
-    output_topic: /stereo_camera/right/image_raw
+    input_topic: stereo_camera/right/rgb/compressed
+    output_topic: stereo_camera/right/image_raw
     encoding: rgb8

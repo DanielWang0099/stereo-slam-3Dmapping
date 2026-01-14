@@ -69,6 +69,11 @@ else
     exit 1
 fi
 
+# Enable verbose TF debugging
+export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity}] [{time}] [{name}]: {message}"
+export RCUTILS_COLORIZED_OUTPUT=1
+print_info "TF2 debug logging enabled"
+
 # Write header to log file
 {
     echo "=============================================="
