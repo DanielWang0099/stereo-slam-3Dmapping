@@ -58,6 +58,8 @@ def generate_launch_description():
     ess_threshold_2 = LaunchConfiguration("ess_threshold_2")
     ess_threshold_3 = LaunchConfiguration("ess_threshold_3")
     ess_threshold_4 = LaunchConfiguration("ess_threshold_4")
+    jetson_device = LaunchConfiguration("jetson_device") 
+    num_buffers = LaunchConfiguration("num_buffers")
     pkg_share = FindPackageShare("nvblox_mapping")
 
     resize_params_path = PathJoinSubstitution([pkg_share, "config", "resize_params.yaml"])
@@ -98,7 +100,7 @@ def generate_launch_description():
                     {"output_bridge_image_topic": "/kevin/stereo_camera/left/nitros_bridge"},
                     {"output_camera_info_topic": "/kevin/stereo_camera/left/camera_info_decoded"},
                     {"output_frame_id": "stereo_left_optical_frame"},  # Try frame_id override
-                    {"num_buffers": 8},
+                    {"num_buffers": num_buffers},
                     {"device_id": 0},
                 ],
             ),
@@ -114,7 +116,7 @@ def generate_launch_description():
                     {"output_bridge_image_topic": "/kevin/stereo_camera/right/nitros_bridge"},
                     {"output_camera_info_topic": "/kevin/stereo_camera/right/camera_info_decoded"},
                     {"output_frame_id": "stereo_right_optical_frame"},  # Try frame_id override
-                    {"num_buffers": 8},
+                    {"num_buffers": num_buffers},
                     {"device_id": 0},
                 ],
             ),
@@ -509,6 +511,16 @@ def generate_launch_description():
                 "use_sim_time",
                 default_value="true",
                 description="Use simulation time from rosbag/clock",
+            ),
+            DeclareLaunchArgument(
+                "jetson_device",
+                default_value="",
+                description="Jetson device type: 'nx' or 'nano' (empty for x86_64)",
+            ),
+            DeclareLaunchArgument(
+                "num_buffers",
+                default_value="8",
+                description="Number of GPU buffer pools (reduce to 4 for Jetson Nano 4GB)",
             ),
             DeclareLaunchArgument(
                 "enable_vslam",

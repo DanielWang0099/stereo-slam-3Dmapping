@@ -1,15 +1,67 @@
-ARG BASE_IMAGE=nvcr.io/nvidia/isaac/ros:x86_64-ros2_humble_f8edad8d48e9aa1b5b240c2374c55d60
+# Jetson Orin NX/Nano Deployment
+# For x86_64, use: nvcr.io/nvidia/isaac/ros:x86_64-ros2_humble_f8edad8d48e9aa1b5b240c2374c55d60
+# For Jetson, use ARM64 base image with JetPack 6 (ROS2 Humble)
+ARG BASE_IMAGE=nvcr.io/nvidia/isaac/ros:jetson-orin-ros2_humble
+
 FROM ${BASE_IMAGE}
 
+# ============================================================================
+# Jetson-Specific Configuration
+# ============================================================================
+
+# Set NVIDIA runtime environment for Jetson
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,graphics,utility
+
+# Enable GPU memory optimization for Jetson (limited VRAM)
+ENV CUDA_FORCE_PTX_JIT=0
+
 RUN apt-get update && apt-get install -y \
+    # Isaac ROS Core Components (Jetson-compatible)
     ros-humble-isaac-ros-ess \
     ros-humble-isaac-ros-ess-models-install \
     ros-humble-isaac-ros-visual-slam \
     ros-humble-isaac-ros-nvblox \
+    \
+    # Communication & Navigation
     ros-humble-mavros \
     ros-humble-isaac-ros-image-proc \
     ros-humble-isaac-ros-stereo-image-proc \
+    \
+    # NITROS Bridge (for zero-copy GPU pipeline)
     ros-humble-isaac-ros-nitros-bridge-ros2 \
     ros-humble-isaac-ros-pynitros \
+    \
+    # Message types
     ros-humble-mavros-msgs \
-    ros-humble-vision-msgs
+    ros-humble-vision-msgs \
+    \
+    # Jetson-specific development tools
+    cuda-runtime-11-8 \
+    libcudnn8 \
+    tensorrt \
+    \
+    # Build tools
+    build-essential \
+    cmake \
+    git \
+    wget \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================================
+# GPU Memory Pool Configuration (Jetson optimization)
+# ============================================================================
+# For Jetson Orin NX/Nano with limited shared GPU/CPU memory
+RUN mkdir -p /etc/nvidia-container-runtime && \
+    echo "disable-require: true" > /etc/nvidia-container-runtime/config.toml
+
+# Optimize for Jetson's limited memory (adjust buffer pools in code)
+ENV NITROS_BUFFER_SIZE=8388608
+ENV JETSON_CLOCKS_ENABLED=0
+
+# ============================================================================
+# Workspace setup
+# ============================================================================
+WORKDIR /workspaces/isaac_ros-dev

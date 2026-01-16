@@ -1,0 +1,32 @@
+# Jetson-Optimized ESS Parameters
+# =============================================================================
+# Tailored for Jetson Orin NX/Nano GPU performance and memory constraints
+#
+# Note: ESS (Elastic Stereo Scales) is memory-intensive on smaller GPUs
+# These parameters balance accuracy with available GPU memory
+
+ess_disparity_node:
+  ros__parameters:
+    use_sim_time: true
+
+    # Pre-trained ESS model (TensorRT engine, GPU-optimized)
+    # Jetson comes with pre-optimized models in JetPack
+    engine_file_path: /workspaces/isaac_ros-dev/isaac_ros_assets/models/dnn_stereo_disparity/dnn_stereo_disparity_v4.1.0_onnx/ess.engine
+
+    # Network input resolution
+    # For Jetson Orin NX: 960x576 is good balance (larger = more GPU memory)
+    # For Jetson Orin Nano 4GB: consider 640x480 if memory-constrained
+    input_layer_width: 960
+    input_layer_height: 576
+
+    # Confidence threshold for disparity masking (0-1)
+    # Higher = more confident matches (fewer false positives)
+    # Lower = more dense disparity map (may include noise)
+    # Jetson typically benefits from 0.3-0.5 range
+    threshold: 0.4
+
+    # GPU optimization flags (Jetson-specific)
+    # These are set automatically by TensorRT but can be tweaked
+    # Enable for Jetson:
+    # - Use persistent kernels for better GPU utilization
+    # - Reduced precision if needed (FP16 instead of FP32)

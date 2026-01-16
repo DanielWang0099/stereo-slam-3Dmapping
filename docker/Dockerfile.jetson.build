@@ -1,0 +1,123 @@
+# Jetson Build Configuration Guide
+# =============================================================================
+# For building on/for Jetson Orin NX or Jetson Orin Nano
+# =============================================================================
+
+# BUILD ON JETSON DEVICE (Recommended)
+# ====================================
+# This is the recommended approach as JetPack is optimized for the device
+
+# 1. Ensure your Jetson has:
+#    - JetPack 6.0+ (includes ROS2 Humble, CUDA 12.2, cuDNN 8.x)
+#    - Docker with nvidia-docker runtime
+
+# 2. Clone the repository on Jetson:
+#    git clone <your-repo> /workspaces/isaac_ros-dev/stereo-slam-3Dmapping
+
+# 3. Build the Docker image (on Jetson):
+#    cd /workspaces/isaac_ros-dev/stereo-slam-3Dmapping
+#    docker build -f docker/Dockerfile.mine -t stereo-slam:jetson-orin-nx .
+
+# 4. Run container with GPU access:
+#    docker run --rm --runtime nvidia \
+#      -v /workspaces/isaac_ros-dev:/workspaces/isaac_ros-dev \
+#      -v /dev:/dev \
+#      --device-cgroup-rule='c 241:* rmw' \
+#      -it stereo-slam:jetson-orin-nx /bin/bash
+
+# BUILD CROSS-COMPILE (Advanced, not recommended)
+# ================================================
+# If you need to build on x86_64 for Jetson deployment:
+# - Use qemu-user-static for cross-compilation
+# - May have performance/compatibility issues
+# - Not recommended - better to build natively on Jetson
+
+# DEPLOYMENT CHECKLIST
+# ====================
+# Before running on Jetson:
+# 
+# [ ] Jetson device: Orin NX or Orin Nano confirmed
+# [ ] JetPack version: 6.0+ with ROS2 Humble
+# [ ] Available storage: 50GB+ for models + workspace
+# [ ] Available GPU memory: 8GB (Orin NX) or 4GB (Orin Nano)
+# [ ] CUDA compute capability: 8.7 (Orin NX) or 8.7 (Orin Nano)
+# 
+# Performance constraints:
+# - Orin NX: 8-core ARM CPU, 8GB unified memory, 100 TOPS peak
+# - Orin Nano: 6-core ARM CPU, 4GB/8GB unified memory, 40 TOPS peak
+# - Both suitable for full GPU pipeline (ESS + VSLAM + Nvblox)
+# - May need to reduce buffer pool size (ess_params.yaml threshold)
+
+# RUNTIME OPTIMIZATION FOR JETSON
+# ================================
+# Set these environment variables before running:
+#
+# export NVPMODEL_CONFIG_FILE=/etc/nvpmodel.conf
+# export JETSON_CLOCKS_ENABLED=0  # Set to 1 for max performance (higher power)
+# export CUDA_FORCE_PTX_JIT=0     # Use cached kernels instead of JIT
+# export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp  # Faster DDS implementation
+# export CUDA_VISIBLE_DEVICES=0   # Specify which GPU to use (0 on Jetson)
+
+# MEMORY CONSTRAINTS
+# ==================
+# Jetson Orin Nano 4GB example:
+# - OS + Docker + ROS2: ~1.5GB
+# - Model files (ESS): ~500MB
+# - Pipeline buffers (8x): ~200-300MB
+# - Available for processing: ~1-1.5GB (tight!)
+#
+# Recommendations:
+# - Use num_buffers=4 instead of 8 for Nano 4GB
+# - Reduce image resolution if needed (resize_params.yaml)
+# - Monitor GPU memory with: nvidia-smi -l 1
+
+# BUILD COMMANDS
+# ==============
+
+# 1. Build on native Jetson (BEST):
+#    docker build -f docker/Dockerfile.mine \
+#      --build-arg BASE_IMAGE=nvcr.io/nvidia/isaac/ros:jetson-orin-ros2_humble \
+#      -t stereo-slam:jetson-orin-nx .
+
+# 2. Run with GPU + device access:
+#    docker run --rm --runtime nvidia \
+#      -e NVIDIA_VISIBLE_DEVICES=all \
+#      -e CUDA_VISIBLE_DEVICES=0 \
+#      --device /dev/nvhost-ctrl \
+#      --device /dev/nvhost-ctrl-gp1 \
+#      --device /dev/nvhost-gpu \
+#      --device /dev/nvmap \
+#      -v /workspaces/isaac_ros-dev:/workspaces/isaac_ros-dev \
+#      -it stereo-slam:jetson-orin-nx bash
+
+# 3. Inside container, build workspace:
+#    cd /workspaces/isaac_ros-dev
+#    colcon build --symlink-install --cmake-args \
+#      -DCMAKE_CXX_STANDARD=17 \
+#      -DCMAKE_CXX_FLAGS="-O3 -march=native"
+
+# 4. Run pipeline:
+#    source install/setup.bash
+#    export BAG_PATH=/path/to/rosbag
+#    ./scripts/run_full_pipeline.bash --use_sim_time:=true
+
+# TROUBLESHOOTING
+# ===============
+# 
+# "Out of memory" errors:
+#   - Reduce num_buffers in launch file (currently 8)
+#   - Set JETSON_CLOCKS_ENABLED=0 to reduce power/thermal but gain headroom
+#   - Check nvidia-smi for memory pressure
+#
+# "CUDA out of memory":
+#   - ESS model too large: check ess_params.yaml engine path
+#   - Reduce resolution: adjust resize_params.yaml
+#   - Close other GPU processes
+#
+# "Port already in use":
+#   - TCP endpoint port (10000): change in launch file
+#   - Foxglove port (8765): change in Foxglove config
+#
+# "TF transforms missing":
+#   - Check rosbag has /kevin/tf topic
+#   - Run diagnose_tf.bash to debug frame tree
