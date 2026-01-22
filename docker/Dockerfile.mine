@@ -74,6 +74,15 @@ RUN apt-get update && apt-get install -y \
 # -------------------------
 # Install VPI (required for Isaac ROS)
 # -------------------------
+RUN apt-get update && apt-get install -y software-properties-common gnupg \
+    && wget -qO - https://repo.download.nvidia.com/jetson/jetson-ota-public.asc | apt-key add - \
+    && add-apt-repository 'deb https://repo.download.nvidia.com/jetson/common r36.4 main' \
+    && apt-get update \
+    && apt-get install -y libnvvpi3 vpi3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set VPI CMake path
+ENV CMAKE_PREFIX_PATH=/opt/nvidia/vpi3:${CMAKE_PREFIX_PATH}
 
 # -------------------------
 # GPU Memory Pool Configuration (Jetson optimization)
