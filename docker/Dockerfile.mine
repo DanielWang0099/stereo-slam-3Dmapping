@@ -72,6 +72,10 @@ RUN apt-get update && apt-get install -y \
 # Clone them in /workspaces/isaac_ros-dev/src/ and build with colcon
 
 # -------------------------
+# Install VPI (required for Isaac ROS)
+# -------------------------
+
+# -------------------------
 # GPU Memory Pool Configuration (Jetson optimization)
 # -------------------------
 RUN mkdir -p /etc/nvidia-container-runtime && \

@@ -60,6 +60,12 @@ print_info "Log file: ${LOG_FILE}"
 print_info "Launch:   ${LAUNCH_PACKAGE} ${LAUNCH_FILE}"
 print_info "=============================================="
 
+# Source ROS2 base installation first
+if [[ -f "/opt/ros/humble/setup.bash" ]]; then
+    print_info "Sourcing ROS2: /opt/ros/humble/setup.bash"
+    source "/opt/ros/humble/setup.bash"
+fi
+
 # Source ROS2 workspace
 if [[ -f "${WORKSPACE_DIR}/install/setup.bash" ]]; then
     print_info "Sourcing workspace: ${WORKSPACE_DIR}/install/setup.bash"
