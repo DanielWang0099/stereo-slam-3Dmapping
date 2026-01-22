@@ -1,99 +1,39 @@
-# -----------------------------------------------------------------------------
-# Jetson Orin NX/Nano Deployment Dockerfile
-# Using Ubuntu 22.04 with CUDA and installing Jetson/Isaac ROS manually
-# -----------------------------------------------------------------------------
-
-ARG BASE_IMAGE=nvidia/cuda:12.2.0-devel-ubuntu22.04
+# Use the official NVIDIA JetPack base image for L4T R36.4.0 (compatible with R36.4.7)
+ARG BASE_IMAGE=nvcr.io/nvidia/l4t-jetpack:r36.4.0
 FROM ${BASE_IMAGE}
 
+USER root
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=UTC
 
-# -------------------------
-# Jetson-specific configuration
-# -------------------------
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES compute,graphics,utility
-ENV CUDA_FORCE_PTX_JIT=0
+# 1. Add NVIDIA Isaac ROS Repositories
+RUN apt-get update && apt-get install -y curl gnupg2 lsb-release && \
+    curl -s https://isaac.download.nvidia.com | apt-key add - && \
+    echo "deb https://isaac.download.nvidia.com $(lsb_release -cs) main" > /etc/apt/sources.list.d/isaac-ros.list
 
-# -------------------------
-# Install basic dependencies first
-# -------------------------
+# 2. Install ROS 2 Humble and Isaac ROS packages
+# Added ros-humble-desktop to include ROS core and essential tools
 RUN apt-get update && apt-get install -y \
-    curl wget gnupg2 lsb-release build-essential cmake git ca-certificates \
+    ros-humble-desktop \
+    ros-humble-isaac-ros-ess \
+    ros-humble-isaac-ros-visual-slam \
+    ros-humble-isaac-ros-nvblox \
+    ros-humble-isaac-ros-image-proc \
+    ros-humble-isaac-ros-stereo-image-proc \
+    ros-humble-isaac-ros-nitros-bridge-ros2 \
+    ros-humble-isaac-ros-pynitros \
+    ros-humble-mavros \
+    ros-humble-mavros-msgs \
+    ros-humble-vision-msgs \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
-# -------------------------
-# Add ROS 2 repository and install ROS 2 Humble
-# -------------------------
-RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
-        -o /usr/share/keyrings/ros-archive-keyring.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
-        http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" \
-        | tee /etc/apt/sources.list.d/ros2.list > /dev/null \
-    && apt-get update && apt-get install -y \
-        ros-humble-ros-base \
-        python3-argcomplete \
-        python3-colcon-common-extensions \
-        python3-rosdep \
-    && rm -rf /var/lib/apt/lists/*
+# 3. Install Mavros GeographicLib datasets (Required for initialization)
+RUN wget https://raw.githubusercontent.com && \
+    bash ./install_geographiclib_datasets.sh && rm install_geographiclib_datasets.sh
 
-# -------------------------
-# Install common ROS2 packages and dependencies
-# -------------------------
-RUN apt-get update && apt-get install -y \
-    ros-humble-cv-bridge \
-    ros-humble-image-transport \
-    ros-humble-camera-info-manager \
-    ros-humble-image-geometry \
-    ros-humble-tf2-ros \
-    ros-humble-tf2-geometry-msgs \
-    ros-humble-rclcpp \
-    ros-humble-sensor-msgs \
-    ros-humble-std-msgs \
-    ros-humble-geometry-msgs \
-    ros-humble-nav-msgs \
-    ros-humble-visualization-msgs \
-    python3-pip \
-    python3-numpy \
-    libopencv-dev \
-    libeigen3-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# -------------------------
-# Install additional build tools for Isaac ROS (to be built from source)
-# -------------------------
-RUN apt-get update && apt-get install -y \
-    python3-vcstool \
-    python3-colcon-common-extensions \
-    && rm -rf /var/lib/apt/lists/*
-
-# Note: Isaac ROS packages (ESS, Visual SLAM, Nvblox) must be built from source
-# Clone them in /workspaces/isaac_ros-dev/src/ and build with colcon
-
-# -------------------------
-# Install VPI (required for Isaac ROS)
-# -------------------------
-RUN apt-get update && apt-get install -y software-properties-common gnupg \
-    && wget -qO - https://repo.download.nvidia.com/jetson/jetson-ota-public.asc | apt-key add - \
-    && add-apt-repository 'deb https://repo.download.nvidia.com/jetson/common r36.4 main' \
-    && apt-get update \
-    && apt-get install -y libnvvpi3 vpi3-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set VPI CMake path
-ENV CMAKE_PREFIX_PATH=/opt/nvidia/vpi3:${CMAKE_PREFIX_PATH}
-
-# -------------------------
-# GPU Memory Pool Configuration (Jetson optimization)
-# -------------------------
-RUN mkdir -p /etc/nvidia-container-runtime && \
-    echo "disable-require: true" > /etc/nvidia-container-runtime/config.toml
-
+# 4. Environment configuration for Orin Nano
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,graphics,utility
 ENV NITROS_BUFFER_SIZE=8388608
-ENV JETSON_CLOCKS_ENABLED=0
 
-# -------------------------
-# Workspace
-# -------------------------
 WORKDIR /workspaces/isaac_ros-dev
