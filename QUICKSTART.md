@@ -2,7 +2,32 @@
 
 ## First Time Setup (5 minutes)
 
-### 1. Set Environment Variable
+### 1. Configure Docker for GPU Access (JetPack 6.0)
+
+```bash
+# Configure Docker to use NVIDIA runtime
+sudo tee /etc/docker/daemon.json > /dev/null <<'EOF'
+{
+    "runtimes": {
+        "nvidia": {
+            "path": "nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+    },
+    "default-runtime": "nvidia"
+}
+EOF
+
+# Restart Docker
+sudo systemctl restart docker
+
+# Verify GPU access works
+docker run --rm nvcr.io/nvidia/l4t-base:r36.2.0 nvidia-smi
+```
+
+**You should see GPU info. If not, check troubleshooting section.**
+
+### 2. Set Environment Variable
 
 ```bash
 cd ~/stereo_ws/stereo-slam-3Dmapping
@@ -11,7 +36,7 @@ echo "export ISAAC_ROS_WS=$(pwd)" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### 2. Launch Development Container
+### 3. Launch Development Container
 
 ```bash
 # This pulls the Isaac ROS Docker image (~8GB download)
@@ -24,7 +49,7 @@ src/isaac_ros_common/scripts/run_dev.sh
 - Enables GPU access
 - Gives you a container shell
 
-### 3. Build Inside Container
+### 4. Build Inside Container
 
 Once you see `admin@container:~$` prompt:
 
@@ -36,7 +61,7 @@ source install/setup.bash
 
 **First build takes ~30-45 minutes on Jetson Orin NX**
 
-### 4. Run the Pipeline
+### 5. Run the Pipeline
 
 ```bash
 ./scripts/run_full_pipeline.bash
@@ -109,17 +134,48 @@ colcon build --symlink-install
 
 ## Troubleshooting
 
+### "failed to inject CDI devices nvidia.com/gpu=all"
+
+**This is the most common issue on JetPack 6.0.** The Docker daemon needs NVIDIA runtime configuration:
+
+```bash
+# Configure Docker for NVIDIA runtime
+sudo tee /etc/docker/daemon.json > /dev/null <<'EOF'
+{
+    "runtimes": {
+        "nvidia": {
+            "path": "nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+    },
+    "default-runtime": "nvidia"
+}
+EOF
+
+# Restart Docker
+sudo systemctl restart docker
+
+# Test GPU access
+docker run --rm nvcr.io/nvidia/l4t-base:r36.2.0 nvidia-smi
+```
+
+If you see GPU info, try `run_dev.sh` again.
+
 ### "ISAAC_ROS_WS not set"
 ```bash
 export ISAAC_ROS_WS=~/stereo_ws/stereo-slam-3Dmapping
 ```
 
 ### "Permission denied" for Docker
+
 ```bash
 sudo usermod -aG docker $USER
-# Then logout/login or:
+# Then MUST logout/login for group to take effect
+# Or in the same terminal only:
 newgrp docker
 ```
+
+**Important:** After `usermod`, you MUST logout/login or use `newgrp docker` in that terminal.
 
 ### Out of memory during build
 ```bash
