@@ -1,21 +1,31 @@
-install
-build
-log
-.github
-logs
-.git
+# Build artifacts
+install/
+build/
+log/
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
 .DS_Store
 *.swp
 *.swo
 *~
-.vscode
-.idea
+
+# Python
 *.pyc
-__pycache__
+__pycache__/
 *.egg-info
-dist
+dist/
+
+# Isaac ROS
 isaac_ros_assets/
+docker/
+
+# Data
 bags/
+*.bag
+*.db3
 *.gv
-/bags/*
 frames*
